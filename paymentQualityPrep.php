@@ -36,7 +36,7 @@ function backFillOldCohort($row, $lastRow) {
         $newRow['possiblePaymentsRT'] += $newRow['possiblePayments'];
         // what if we are in the 1st 4 weeks and RTx needs to be filled in?
         
-        
+        // something is wrong with possible payments
         
         echo "do ".$newWeek->format('Y-m-d')."\n";
         print_r($newRow);
