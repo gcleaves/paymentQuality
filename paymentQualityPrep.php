@@ -26,7 +26,7 @@ function getLastMonday() {
  * @return void
  */
 function backFillOldCohort($row, $lastRow) {
-    global $lastMondayYMD, $lastMonday;
+    global $lastMondayYMD, $lastMonday, $text, $handle, $delimeter;
     
     $newRow = $lastRow;
     $lastPayWeek = new DateTime($lastRow['payWeek']);
@@ -38,16 +38,18 @@ function backFillOldCohort($row, $lastRow) {
         $newRow['payments'] = 0;
         $newRow['payers'] = 0;
         $newRow['weeks']++;
-        $newRow['possiblePayments'] = $newRow['originalSubscribers'];
+        $newRow['possiblePayments'] = $newRow['originalSubscribers'] * $newRow['weeks'];
         $newRow['revenue'] = 0;
         $newRow['rps'] = 0;
-        $newRow['possiblePaymentsRT'] += $newRow['possiblePayments'];
+        $newRow['possiblePaymentsRT'] = $newRow['possiblePayments'];
         // what if we are in the 1st 4 weeks and RTx needs to be filled in?
         
-        // something is wrong with possible payments
+        // need to fix RT1-4
         
         echo "do ".$newWeek->format('Y-m-d')."\n";
+        if($text) if(! fwrite ($handle, implode($delimeter, $newRow) . "\n")) throw new Exception("Could not write to output file.");
         print_r($newRow);
+        
     } while ($newWeek < $lastMonday);
 }
 
