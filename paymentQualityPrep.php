@@ -30,7 +30,7 @@ function backFillOldCohort($row, $lastRow) {
         $newRow['payments'] = 0;
         $newRow['payers'] = 0;
         $newRow['weeks']++;
-        $newRow['possiblePayments'] = $newRow['originalSubscribers']*$newRow['weeks'];
+        $newRow['possiblePayments'] = $newRow['originalSubscribers'];
         $newRow['revenue'] = 0;
         $newRow['rps'] = 0;
         $newRow['possiblePaymentsRT'] += $newRow['possiblePayments'];
@@ -50,7 +50,7 @@ $xml = 0;
 $text = 1;
 $textAppend = 0;
 $db = 0;
-$output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_devel";
+$output_filename = "./payment_quality_devel";
 $delimeter = ";";
 $lastMonday = getLastMonday();
 $lastMondayYMD = $lastMonday->format("Y-m-d");
@@ -154,7 +154,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     // Same cohort
     if($lastSource == strtoupper($row["source"]) && $lastCohort == $row["cohort"] && $lastProduct == strtoupper($row["product"])) {
         $paymentsRT += $row['payments'];
-        $possiblePaymentsRT += $row['possiblePayments'];
+        $possiblePaymentsRT = $row['possiblePayments'];
         $revenueRT += $row['revenue'];
         $rpsRT += $row['rps'];
 
@@ -163,23 +163,23 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 // We really shouldn't find ourselves in this position, only when there 
                 // is funky data with payments before cohort date
                 file_put_contents('php://stderr', "Existing problem cohort {$row['product']} {$row['source']} {$row['cohort']} {$row['payWeek']} {$row['weeks']}\n");
-                $paymentPercent1 = $paymentsRT / $possiblePaymentsRT;
+                $paymentPercent1 = $paymentsRT / $possiblePayments;
                 $paymentsRT1 = $paymentsRT;
-                $possiblePaymentsRT1 = $possiblePaymentsRT;				
+                $possiblePaymentsRT1 = $possiblePayments;				
             case 2:
-                $paymentPercent2 = $paymentsRT / $possiblePaymentsRT;
+                $paymentPercent2 = $paymentsRT / $possiblePayments;
                 $paymentsRT2 = $paymentsRT;
-                $possiblePaymentsRT2 = $possiblePaymentsRT;
+                $possiblePaymentsRT2 = $possiblePayments;
                 break;
             case 3:
-                $paymentPercent3 = $paymentsRT / $possiblePaymentsRT;
+                $paymentPercent3 = $paymentsRT / $possiblePayments;
                 $paymentsRT3 = $paymentsRT;
-                $possiblePaymentsRT3 = $possiblePaymentsRT;				
+                $possiblePaymentsRT3 = $possiblePayments;			
                 break;
             case 4:
-                $paymentPercent4 = $paymentsRT / $possiblePaymentsRT;
+                $paymentPercent4 = $paymentsRT / $possiblePayments;
                 $paymentsRT4 = $paymentsRT;
-                $possiblePaymentsRT4 = $possiblePaymentsRT;				
+                $possiblePaymentsRT4 = $possiblePayments;			
                 break;				
         }
 
