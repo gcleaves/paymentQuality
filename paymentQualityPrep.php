@@ -17,14 +17,30 @@ function getLastMonday() {
     //"@1215282385"
 }
 
-function backFillNewCohort($row, $lastRow) {
+function backFillOldCohort($row, $lastRow) {
     global $lastMondayYMD, $lastMonday;
     
+    $newRow = $lastRow;
     $lastPayWeek = new DateTime($lastRow['payWeek']);
     file_put_contents('php://stderr', "Cohort did not reach end of life: {$lastRow['product']} {$lastRow['source']} {$lastRow['cohort']} [{$lastRow['payWeek']}|$lastMondayYMD] \n");
     do {
-        echo "do ".$lastPayWeek->format("Y-m-d")."\n";
-    } while ($lastPayWeek->add(DateInterval::createFromDateString("1 week")) <= $lastMonday);
+        $newWeek = $lastPayWeek->add(DateInterval::createFromDateString("1 week"));
+        $newRow['payWeek'] = $newWeek->format('Y-m-d');
+        $newRow['subscribers'] = 0;
+        $newRow['payments'] = 0;
+        $newRow['payers'] = 0;
+        $newRow['weeks']++;
+        $newRow['possiblePayments'] = $newRow['originalSubscribers']*$newRow['weeks'];
+        $newRow['revenue'] = 0;
+        $newRow['rps'] = 0;
+        $newRow['possiblePaymentsRT'] += $newRow['possiblePayments'];
+        // what if we are in the 1st 4 weeks and RTx needs to be filled in?
+        
+        
+        
+        echo "do ".$newWeek->format('Y-m-d')."\n";
+        print_r($newRow);
+    } while ($newWeek < $lastMonday);
 }
 
 echo getLastMonday()->format('Y-m-d')."\n";
@@ -177,7 +193,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         } 
         
         if(($r != 1) && ($lastRow['payWeek'] != $lastMondayYMD)) {
-            backFillNewCohort($row, $lastRow);
+            backFillOldCohort($row, $lastRow);
         }
 
         $paymentsRT = $row['payments'];
