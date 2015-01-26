@@ -17,6 +17,14 @@ function getLastMonday() {
     //"@1215282385"
 }
 
+/**
+ * 
+ * @global type $lastMondayYMD
+ * @global type $lastMonday
+ * @param type $row
+ * @param type $lastRow The last row of the previous cohort which is 'unfinished'
+ * @return void
+ */
 function backFillOldCohort($row, $lastRow) {
     global $lastMondayYMD, $lastMonday;
     
@@ -163,23 +171,23 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 // We really shouldn't find ourselves in this position, only when there 
                 // is funky data with payments before cohort date
                 file_put_contents('php://stderr', "Existing problem cohort {$row['product']} {$row['source']} {$row['cohort']} {$row['payWeek']} {$row['weeks']}\n");
-                $paymentPercent1 = $paymentsRT / $possiblePayments;
+                $paymentPercent1 = $paymentsRT / $row['possiblePayments'];
                 $paymentsRT1 = $paymentsRT;
-                $possiblePaymentsRT1 = $possiblePayments;				
+                $possiblePaymentsRT1 = $row['possiblePayments'];				
             case 2:
-                $paymentPercent2 = $paymentsRT / $possiblePayments;
+                $paymentPercent2 = $paymentsRT / $row['possiblePayments'];
                 $paymentsRT2 = $paymentsRT;
-                $possiblePaymentsRT2 = $possiblePayments;
+                $possiblePaymentsRT2 = $row['possiblePayments'];
                 break;
             case 3:
-                $paymentPercent3 = $paymentsRT / $possiblePayments;
+                $paymentPercent3 = $paymentsRT / $row['possiblePayments'];
                 $paymentsRT3 = $paymentsRT;
-                $possiblePaymentsRT3 = $possiblePayments;			
+                $possiblePaymentsRT3 = $row['possiblePayments'];			
                 break;
             case 4:
-                $paymentPercent4 = $paymentsRT / $possiblePayments;
+                $paymentPercent4 = $paymentsRT / $row['possiblePayments'];
                 $paymentsRT4 = $paymentsRT;
-                $possiblePaymentsRT4 = $possiblePayments;			
+                $possiblePaymentsRT4 = $row['possiblePayments'];			
                 break;				
         }
 
