@@ -7,7 +7,7 @@ It calculates running totals.
 this is the back_fill branch
 */
 /**
- * 
+ * Last Monday is the most recent cohort we will work with
  * @return \DateTime
  */
 function getLastMonday() {
@@ -44,7 +44,32 @@ function backFillOldCohort($row, $lastRow) {
         $newRow['possiblePaymentsRT'] = $newRow['possiblePayments'];
         // what if we are in the 1st 4 weeks and RTx needs to be filled in?
         
+        //$paymentsRT = $row['payments'];
         // need to fix RT1-4
+        switch($newRow['weeks']) {
+            case 1:
+                // We really shouldn't find ourselves in this position, only when there 
+                // is funky data with payments before cohort date
+                file_put_contents('php://stderr', "BACKFILL: Existing problem cohort {$row['product']} {$row['source']} {$row['cohort']} {$row['payWeek']} {$row['weeks']}\n");
+                $paymentPercent1 = $newRow['paymentsRT'] / $newRow['possiblePayments'];
+                $newRow['paymentsRT1'] = $newRow['paymentsRT'];
+                $newRow['possiblePaymentsRT1'] = $newRow['possiblePayments'];				
+            case 2:
+                $paymentPercent2 = $newRow['paymentsRT'] / $newRow['possiblePayments'];
+                $newRow['paymentsRT2'] = $newRow['paymentsRT'];
+                $newRow['possiblePaymentsRT2'] = $newRow['possiblePayments'];
+                break;
+            case 3:
+                $paymentPercent3 = $newRow['paymentsRT'] / $newRow['possiblePayments'];
+                $newRow['paymentsRT3'] = $newRow['paymentsRT'];
+                $newRow['possiblePaymentsRT3'] = $newRow['possiblePayments'];			
+                break;
+            case 4:
+                $paymentPercent4 = $newRow['paymentsRT'] / $newRow['possiblePayments'];
+                $newRow['paymentsRT4'] = $newRow['paymentsRT'];
+                $newRow['possiblePaymentsRT4'] = $newRow['possiblePayments'];			
+                break;				
+        }
         
         echo "do ".$newWeek->format('Y-m-d')."\n";
         if($text) if(! fwrite ($handle, implode($delimeter, $newRow) . "\n")) throw new Exception("Could not write to output file.");

@@ -37,7 +37,7 @@ from (
         and dsub.year_week_start != (CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY)
         and dpay.year_week_start != (CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY)
         and sub.product in ('videospremium')
-        #and tr.source = '1001consejos'
+        #and tr.source = 'adcash'
         #and sub.subStartDate >= '2015-01-19'
     group by sub.product,tr.source,cohort,payWeek
     order by sub.product,tr.source,cohort,payWeek
