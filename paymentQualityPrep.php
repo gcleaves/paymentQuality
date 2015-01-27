@@ -39,9 +39,10 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
     $possiblePaymentsRT3 = null;
     $possiblePaymentsRT4 = null;
     $response = array();
-    
     $newRow = $lastRow;
     $lastPayWeek = new DateTime($lastRow['payWeek']);
+    
+    $newRow['notes'] = "backfill " . (($sameCohort) ? "same cohort" : "old cohort");
     file_put_contents('php://stderr', "Cohort did not reach ".$fillTo->format('Y-m-d').": {$lastRow['product']} {$lastRow['source']} {$lastRow['cohort']} [{$lastRow['payWeek']}|$lastMondayYMD] \n");
     do {
         $newWeek = $lastPayWeek->add(DateInterval::createFromDateString("1 week"));
@@ -98,7 +99,7 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
         
         echo "do ".$newWeek->format('Y-m-d')."\n";
         if($text) if(! fwrite ($handle, implode($delimeter, $newRow) . "\n")) throw new Exception("Could not write to output file.");
-        print_r($newRow);
+        //print_r($newRow);
     } while ($newWeek < $fillTo);
     
     return $response;
@@ -112,6 +113,7 @@ $text = 1;
 $textAppend = 0;
 $db = 0;
 $output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_devel";
+$output_filename = "./payment_quality_devel";
 $delimeter = ";";
 $lastMonday = getLastMonday();
 $lastMondayYMD = $lastMonday->format("Y-m-d");
@@ -149,6 +151,7 @@ if($xml) {
 
 echo "Launching query...\n";
 $stmt = $dbQ->query($sqlString);
+echo "Query finished...\n";
 
 // Initialize vars
 $r = 0;
@@ -177,6 +180,7 @@ $headersExtra[] = 'possiblePaymentsRT3';
 $headersExtra[] = 'possiblePaymentsRT4';
 $headersExtra[] = 'revenueRT';
 $headersExtra[] = 'rpsRT';
+$headersExtra[] = 'notes';
 
 echo "Looping through results...\n";
 // Loop through results
@@ -264,6 +268,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         } 
         
         if(($r != 1) && ($lastRow['payWeek'] != $lastMondayYMD)) {
+            echo "old cohort\n";
             backFillCohort($row, $lastRow, $lastMonday);
         }
 
