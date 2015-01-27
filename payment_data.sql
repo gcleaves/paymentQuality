@@ -12,8 +12,8 @@ select
     ,sum(cs.subscribers) * ((CAST(DATEDIFF(p.payWeek,p.cohort) AS SIGNED) / 7) + 1) as possiblePayments
 from (
     Select 
-        sub.product,
-        tr.source,
+        lower(sub.product) product,
+        lower(tr.source) source,
         dsub.year_week_start cohort,
         dpay.year_week_start payWeek,
         count(distinct pay.id) payments,
@@ -39,10 +39,10 @@ from (
         #and sub.product in ('videospremium')
         #and tr.source = 'adcash'
         #and sub.subStartDate >= '2015-01-19'
-    group by sub.product,tr.source,cohort,payWeek
-    order by sub.product,tr.source,cohort,payWeek
+    group by lower(sub.product),lower(tr.source),cohort,payWeek
+    order by lower(sub.product),lower(tr.source),cohort,payWeek
 ) p
-inner join _tmp.cohort_subs cs on cs.cohort=p.cohort and cs.product=p.product and cs.source=p.source
+inner join _tmp.cohort_subs cs on cs.cohort=p.cohort and lower(cs.product)=lower(p.product) and lower(cs.source)=lower(p.source)
 where p.payWeek is not null
-group by p.product, p.source, p.cohort, p.payWeek
-order by p.product, p.source, p.cohort, p.payWeek # ORDER is important to php script! 
+group by lower(p.product), lower(p.source), p.cohort, p.payWeek
+order by lower(p.product), lower(p.source), p.cohort, p.payWeek # ORDER is important to php script! 

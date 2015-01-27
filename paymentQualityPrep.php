@@ -43,7 +43,7 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
     $lastPayWeek = new DateTime($lastRow['payWeek']);
     
     $newRow['notes'] = "backfill " . (($sameCohort) ? "same cohort" : "old cohort");
-    file_put_contents('php://stderr', "Cohort did not reach ".$fillTo->format('Y-m-d').": {$lastRow['product']} {$lastRow['source']} {$lastRow['cohort']} [{$lastRow['payWeek']}|$lastMondayYMD] \n");
+    file_put_contents('php://stderr', "Cohort did not reach ".$fillTo->format('Y-m-d').": {$lastRow['product']} {$lastRow['source']} {$lastRow['cohort']} [{$lastRow['payWeek']}] \n");
     do {
         $newWeek = $lastPayWeek->add(DateInterval::createFromDateString("1 week"));
         $newRow['payWeek'] = $newWeek->format('Y-m-d');
@@ -113,7 +113,7 @@ $text = 1;
 $textAppend = 0;
 $db = 0;
 $output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_devel";
-$output_filename = "./payment_quality_devel";
+//$output_filename = "./payment_quality_devel";
 $delimeter = ";";
 $lastMonday = getLastMonday();
 $lastMondayYMD = $lastMonday->format("Y-m-d");
