@@ -4,3 +4,5 @@ payment_quality_devel.txt
 *.properties
 
 nbproject/project.xml
+
+php_env.txt

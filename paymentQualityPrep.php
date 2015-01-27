@@ -11,7 +11,7 @@ this is the back_fill branch
  * @return \DateTime
  */
 function getLastMonday() {
-    $lastMonday = strtotime('last Monday');
+    $lastMonday = strtotime('Monday last week');
     $dt = new DateTime('@'.$lastMonday);
     return $dt;
     //"@1215282385"
@@ -19,18 +19,30 @@ function getLastMonday() {
 
 /**
  * 
- * @global type $lastMondayYMD
- * @global type $lastMonday
- * @param type $row
- * @param type $lastRow The last row of the previous cohort which is 'unfinished'
- * @return void
+ * @global int $text
+ * @global type $handle
+ * @global string $delimeter
+ * @param array $row
+ * @param array $lastRow
+ * @param DateTime $fillTo
+ * @throws Exception
  */
-function backFillOldCohort($row, $lastRow) {
-    global $lastMondayYMD, $lastMonday, $text, $handle, $delimeter;
+function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohort = false) {
+    global $text, $handle, $delimeter;
+    
+    $paymentsRT1 = null;
+    $paymentsRT2 = null;
+    $paymentsRT3 = null;
+    $paymentsRT4 = null;
+    $possiblePaymentsRT1 = null;
+    $possiblePaymentsRT2 = null;
+    $possiblePaymentsRT3 = null;
+    $possiblePaymentsRT4 = null;
+    $response = array();
     
     $newRow = $lastRow;
     $lastPayWeek = new DateTime($lastRow['payWeek']);
-    file_put_contents('php://stderr', "Cohort did not reach end of life: {$lastRow['product']} {$lastRow['source']} {$lastRow['cohort']} [{$lastRow['payWeek']}|$lastMondayYMD] \n");
+    file_put_contents('php://stderr', "Cohort did not reach ".$fillTo->format('Y-m-d').": {$lastRow['product']} {$lastRow['source']} {$lastRow['cohort']} [{$lastRow['payWeek']}|$lastMondayYMD] \n");
     do {
         $newWeek = $lastPayWeek->add(DateInterval::createFromDateString("1 week"));
         $newRow['payWeek'] = $newWeek->format('Y-m-d');
@@ -53,29 +65,43 @@ function backFillOldCohort($row, $lastRow) {
                 file_put_contents('php://stderr', "BACKFILL: Existing problem cohort {$row['product']} {$row['source']} {$row['cohort']} {$row['payWeek']} {$row['weeks']}\n");
                 $paymentPercent1 = $newRow['paymentsRT'] / $newRow['possiblePayments'];
                 $newRow['paymentsRT1'] = $newRow['paymentsRT'];
-                $newRow['possiblePaymentsRT1'] = $newRow['possiblePayments'];				
+                $newRow['possiblePaymentsRT1'] = $newRow['possiblePayments'];
+                $response['paymentsRT1'] = $newRow['paymentsRT'];
+                $response['$possiblePaymentsRT1'] = $newRow['possiblePayments'];                    
+                
+                break;
             case 2:
                 $paymentPercent2 = $newRow['paymentsRT'] / $newRow['possiblePayments'];
                 $newRow['paymentsRT2'] = $newRow['paymentsRT'];
                 $newRow['possiblePaymentsRT2'] = $newRow['possiblePayments'];
+                $response['paymentsRT2'] = $newRow['paymentsRT'];
+                $response['possiblePaymentsRT2'] = $newRow['possiblePayments'];     
+                
                 break;
             case 3:
                 $paymentPercent3 = $newRow['paymentsRT'] / $newRow['possiblePayments'];
                 $newRow['paymentsRT3'] = $newRow['paymentsRT'];
-                $newRow['possiblePaymentsRT3'] = $newRow['possiblePayments'];			
+                $newRow['possiblePaymentsRT3'] = $newRow['possiblePayments'];
+                $response['paymentsRT3'] = $newRow['paymentsRT'];
+                $response['possiblePaymentsRT3'] = $newRow['possiblePayments'];     
+                
                 break;
             case 4:
                 $paymentPercent4 = $newRow['paymentsRT'] / $newRow['possiblePayments'];
                 $newRow['paymentsRT4'] = $newRow['paymentsRT'];
                 $newRow['possiblePaymentsRT4'] = $newRow['possiblePayments'];			
+                $response['paymentsRT4'] = $newRow['paymentsRT'];
+                $response['possiblePaymentsRT4'] = $newRow['possiblePayments'];     
+                
                 break;				
         }
         
         echo "do ".$newWeek->format('Y-m-d')."\n";
         if($text) if(! fwrite ($handle, implode($delimeter, $newRow) . "\n")) throw new Exception("Could not write to output file.");
         print_r($newRow);
-        
-    } while ($newWeek < $lastMonday);
+    } while ($newWeek < $fillTo);
+    
+    return $response;
 }
 
 echo getLastMonday()->format('Y-m-d')."\n";
@@ -85,7 +111,7 @@ $xml = 0;
 $text = 1;
 $textAppend = 0;
 $db = 0;
-$output_filename = "./payment_quality_devel";
+$output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_devel";
 $delimeter = ";";
 $lastMonday = getLastMonday();
 $lastMondayYMD = $lastMonday->format("Y-m-d");
@@ -188,6 +214,16 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
     // Same cohort
     if($lastSource == strtoupper($row["source"]) && $lastCohort == $row["cohort"] && $lastProduct == strtoupper($row["product"])) {
+        
+        if( ($lastRow['weeks']+1) != $row['weeks'] ) {
+            //file_put_contents('php://stderr', "Error in same cohort {$row['product']} {$row['source']} {$row['cohort']} {$row['payWeek']} {$row['weeks']}\n");
+            $pw = new DateTime($row['payWeek']);
+            $response = backFillCohort($row, $lastRow, $pw->sub(DateInterval::createFromDateString("1 week")), true);
+            foreach($response as $key=>$value) {
+                $$key = $value;
+            }
+        }
+        
         $paymentsRT += $row['payments'];
         $possiblePaymentsRT = $row['possiblePayments'];
         $revenueRT += $row['revenue'];
@@ -228,7 +264,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         } 
         
         if(($r != 1) && ($lastRow['payWeek'] != $lastMondayYMD)) {
-            backFillOldCohort($row, $lastRow);
+            backFillCohort($row, $lastRow, $lastMonday);
         }
 
         $paymentsRT = $row['payments'];
