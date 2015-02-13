@@ -6,6 +6,18 @@ It calculates running totals.
 
 this is the back_fill branch
 */
+
+$backFill = 0;
+$xml = 0;
+$text = 1;
+$textAppend = 0;
+$db = 0;
+$output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_simple_day";
+//$output_filename = "./payment_quality_devel";
+$delimeter = ";";
+// Import SQL query
+$sqlString = file_get_contents("./payment_data_simple_day.sql");
+
 /**
  * Last Monday is the most recent cohort we will work with
  * @return \DateTime
@@ -108,22 +120,12 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
 echo getLastMonday()->format('Y-m-d')."\n";
 //die();
 
-$backFill = 1;
-$xml = 0;
-$text = 1;
-$textAppend = 0;
-$db = 0;
-$output_filename = "/Users/gcleaves/Google Drive/src/payment_quality";
-//$output_filename = "./payment_quality_devel";
-$delimeter = ";";
+
 $lastMonday = getLastMonday();
 $lastMondayYMD = $lastMonday->format("Y-m-d");
 $lastRow = array();
 
 echo "Launching...\n";
-
-// Import SQL query
-$sqlString = file_get_contents("./payment_data.sql");
 
 echo "Connecting to DB...\n";
 // Connect to DB for query
