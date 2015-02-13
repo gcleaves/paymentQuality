@@ -39,6 +39,7 @@ from (
         #and sub.product in ('videospremium')
         #and tr.source = 'adcash'
         #and sub.subStartDate >= '2015-01-19'
+        #and dpay.year_week_start >= '2015-01-26'
     group by lower(sub.product),lower(tr.source),cohort,payWeek
     order by lower(sub.product),lower(tr.source),cohort,payWeek
 ) p

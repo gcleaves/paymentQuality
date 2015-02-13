@@ -108,11 +108,12 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
 echo getLastMonday()->format('Y-m-d')."\n";
 //die();
 
+$backFill = 1;
 $xml = 0;
 $text = 1;
 $textAppend = 0;
 $db = 0;
-$output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_devel";
+$output_filename = "/Users/gcleaves/Google Drive/src/payment_quality";
 //$output_filename = "./payment_quality_devel";
 $delimeter = ";";
 $lastMonday = getLastMonday();
@@ -138,7 +139,11 @@ if($db) {
 echo "Opening output file...\n";
 // Open output file
 $openMethod = ($textAppend) ? "a" : "w";
-if($text) if(! $handle = fopen($output_filename.".txt", $openMethod)) throw new Exception("Could not open output file.");
+if ($text) {
+    if (!$handle = fopen($output_filename . ".txt", $openMethod)) {
+        throw new Exception("Could not open output file.");
+    }
+}
 
 if($xml) {
     $xw = new XMLWriter();
@@ -187,7 +192,9 @@ echo "Looping through results...\n";
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $r++;
     //echo "Processing row $r ...\n";
-    if($xml) $xw->startElement("row");
+    if ($xml) {
+        $xw->startElement("row");
+    }
 
     // Write file headers if this is first row
     if(''==$lastSource) {
@@ -222,10 +229,13 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         if( ($lastRow['weeks']+1) != $row['weeks'] ) {
             //file_put_contents('php://stderr', "Error in same cohort {$row['product']} {$row['source']} {$row['cohort']} {$row['payWeek']} {$row['weeks']}\n");
             $pw = new DateTime($row['payWeek']);
-            $response = backFillCohort($row, $lastRow, $pw->sub(DateInterval::createFromDateString("1 week")), true);
-            foreach($response as $key=>$value) {
-                $$key = $value;
+            if ($backFill) {
+                $response = backFillCohort($row, $lastRow, $pw->sub(DateInterval::createFromDateString("1 week")), true);
+                foreach($response as $key=>$value) {
+                    $$key = $value;
+                }
             }
+
         }
         
         $paymentsRT += $row['payments'];
@@ -269,7 +279,9 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         
         if(($r != 1) && ($lastRow['payWeek'] != $lastMondayYMD)) {
             echo "old cohort\n";
-            backFillCohort($row, $lastRow, $lastMonday);
+            if ($backFill) {
+                backFillCohort($row, $lastRow, $lastMonday);
+            }
         }
 
         $paymentsRT = $row['payments'];
@@ -313,7 +325,11 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 
     // Write to output
     //print_r($row);
-    if($text) if(! fwrite ($handle, implode($delimeter, $row) . "\n")) throw new Exception("Could not write to output file.");
+    if ($text) {
+        if (!fwrite($handle, implode($delimeter, $row) . "\n")) {
+            throw new Exception("Could not write to output file.");
+        }
+    }
     if($xml) {
         foreach($row as $key=>$value) {
             $xw->writeElement($key,$value);
@@ -329,7 +345,11 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
 }
 
 // Close file
-if($xml) $xw->endElement();
-if($xml) file_put_contents('./'.$output_filename.'.xml',$xw->outputMemory());
+if ($xml) {
+    $xw->endElement();
+}
+if ($xml) {
+    file_put_contents('./' . $output_filename . '.xml', $xw->outputMemory());
+}
 echo "Done...\n";
 //echo "$cols \n$vals \n";
