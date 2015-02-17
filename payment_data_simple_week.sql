@@ -40,7 +40,7 @@ from (
     group by lower(sub.product),lower(t.source),cohort,payWeek
     order by lower(sub.product),lower(t.source),cohort,payWeek
 ) p
-inner join simplemvas.cohort_subs cs on cs.cohort=p.cohort and lower(cs.product)=lower(p.product) and lower(cs.source)=lower(p.source)
+inner join simplemvas.cohort_subs_week_simple cs on cs.cohort=p.cohort and lower(cs.product)=lower(p.product) and lower(cs.source)=lower(p.source)
 where p.payWeek is not null
 group by lower(p.product), lower(p.source), p.cohort, p.payWeek
 order by lower(p.product), lower(p.source), p.cohort, p.payWeek # ORDER is important to php script! 

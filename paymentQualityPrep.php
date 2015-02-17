@@ -7,16 +7,21 @@ It calculates running totals.
 this is the back_fill branch
 */
 
-$backFill = 0;
+/*
+ * backfill day isn't working, endless loop, can't get debugger to work
+ */
+
+$backFill = 1;
+$cohortType = "week";
 $xml = 0;
 $text = 1;
 $textAppend = 0;
 $db = 0;
-$output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_simple_day";
+$output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_simple_week";
 //$output_filename = "./payment_quality_devel";
 $delimeter = ";";
 // Import SQL query
-$sqlString = file_get_contents("./payment_data_simple_day.sql");
+$sqlString = file_get_contents("./payment_data_simple_$cohortType.sql");
 
 /**
  * Last Monday is the most recent cohort we will work with
@@ -40,7 +45,7 @@ function getLastMonday() {
  * @throws Exception
  */
 function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohort = false) {
-    global $text, $handle, $delimeter;
+    global $text, $handle, $delimeter, $cohortType;
     
     $paymentsRT1 = null;
     $paymentsRT2 = null;
@@ -57,7 +62,7 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
     $newRow['notes'] = "backfill " . (($sameCohort) ? "same cohort" : "old cohort");
     file_put_contents('php://stderr', "Cohort did not reach ".$fillTo->format('Y-m-d').": {$lastRow['product']} {$lastRow['source']} {$lastRow['cohort']} [{$lastRow['payWeek']}] \n");
     do {
-        $newWeek = $lastPayWeek->add(DateInterval::createFromDateString("1 week"));
+        $newWeek = $lastPayWeek->add(DateInterval::createFromDateString("1 $cohortType"));
         $newRow['payWeek'] = $newWeek->format('Y-m-d');
         $newRow['subscribers'] = 0;
         $newRow['payments'] = 0;
@@ -110,6 +115,7 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
         }
         
         echo "do ".$newWeek->format('Y-m-d')."\n";
+        if(''==trim($newRow['source'])) $newRow['source']='unknown';
         if($text) if(! fwrite ($handle, implode($delimeter, $newRow) . "\n")) throw new Exception("Could not write to output file.");
         //print_r($newRow);
     } while ($newWeek < $fillTo);
@@ -197,9 +203,8 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     if ($xml) {
         $xw->startElement("row");
     }
-
     // Write file headers if this is first row
-    if(''==$lastSource) {
+    if(1==$r) {
         $colcount = $stmt->columnCount();
         for($a=0;$a<$colcount;$a++) {
             $meta = $stmt->getColumnMeta($a);
@@ -232,7 +237,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             //file_put_contents('php://stderr', "Error in same cohort {$row['product']} {$row['source']} {$row['cohort']} {$row['payWeek']} {$row['weeks']}\n");
             $pw = new DateTime($row['payWeek']);
             if ($backFill) {
-                $response = backFillCohort($row, $lastRow, $pw->sub(DateInterval::createFromDateString("1 week")), true);
+                $response = backFillCohort($row, $lastRow, $pw->sub(DateInterval::createFromDateString("1 $cohortType")), true);
                 foreach($response as $key=>$value) {
                     $$key = $value;
                 }
@@ -328,6 +333,7 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     // Write to output
     //print_r($row);
     if ($text) {
+        if(''==trim($row['source'])) $row['source']='unknown';
         if (!fwrite($handle, implode($delimeter, $row) . "\n")) {
             throw new Exception("Could not write to output file.");
         }

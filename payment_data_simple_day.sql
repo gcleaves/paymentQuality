@@ -29,8 +29,8 @@ from (
         sub.status != - 1
         #and dsub.year_week_start != (CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY)
         #and dpay.year_week_start != (CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY)
-        #and sub.product in ('videospremium')
-        #and tr.source = 'adcash'
+        and sub.product in ('mihoroscopo')
+        and t.source in ('wigetmedia','mobusi','inmobi','exoclick')
         #and sub.subStartDate >= '2015-01-19'
         #and dpay.year_week_start >= '2015-01-26'
     group by lower(sub.product),lower(t.source),cohort,payWeek
