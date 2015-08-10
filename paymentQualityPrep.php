@@ -7,9 +7,7 @@ It calculates running totals.
 this is the back_fill branch
 */
 
-/*
- * backfill day isn't working, endless loop, can't get debugger to work
- */
+
 
 $backFill = 1;
 $cohortType = "week";
@@ -125,7 +123,8 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
 
 echo getLastMonday()->format('Y-m-d')."\n";
 //die();
-
+$config = yaml_parse_file(__DIR__ . '/config.yml');
+//print_r($config); exit;
 
 $lastMonday = getLastMonday();
 $lastMondayYMD = $lastMonday->format("Y-m-d");
@@ -135,12 +134,13 @@ echo "Launching...\n";
 
 echo "Connecting to DB...\n";
 // Connect to DB for query
-$dbQ = new PDO(getenv('db_cs'), getenv('db_user'), getenv('db_pass'));
+//$dbQ = new PDO(getenv('db_cs'), getenv('db_user'), getenv('db_pass'));
+$dbQ = new PDO($config['db_cs'], $config['db_user'], $config['db_pass']);
 $dbQ->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 if($db) {
     // Connect to DB for write
-    $dbW = new PDO(getenv('db_cs'), getenv('db_user'), getenv('db_pass'));
+    $dbW = new PDO($config['db_cs'], $config['db_user'], $config['db_pass']);
     $dbW->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 }
 
