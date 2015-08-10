@@ -19,7 +19,7 @@ $output_filename = "/Users/gcleaves/Google Drive/src/payment_quality_simple_week
 //$output_filename = "./payment_quality_devel";
 $delimeter = ";";
 // Import SQL query
-$sqlString = file_get_contents("./payment_data_simple_$cohortType.sql");
+$sqlString = file_get_contents("./payment_data_simple_".$cohortType."_no_source.sql");
 
 /**
  * Last Monday is the most recent cohort we will work with
