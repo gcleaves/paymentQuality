@@ -123,7 +123,7 @@ function backFillCohort(array $row, array $lastRow, DateTime $fillTo, $sameCohor
 
 echo getLastMonday()->format('Y-m-d')."\n";
 //die();
-$config = yaml_parse_file(__DIR__ . '/config.yml');
+$config = yaml_parse_file(__DIR__ . '/config.dist.yml');
 //print_r($config); exit;
 
 $lastMonday = getLastMonday();
