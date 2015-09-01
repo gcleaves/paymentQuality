@@ -27,8 +27,8 @@ from (
         simplemvas.dcb_payments as pay ON sub.request_id2 = pay.request_id2 and pay.status = 2
                 left join
         general.dates dpay ON date(pay.payment_date) = dpay.date
-                inner join
-        simplemvas.dcb_transactions t ON sub.request_id2 = t.request_id2
+                #inner join
+        #simplemvas.dcb_transactions t ON sub.request_id2 = t.request_id2
     where
         sub.status != - 1
         and dsub.year_week_start != (CURDATE() - INTERVAL WEEKDAY(CURDATE()) DAY)
@@ -37,8 +37,8 @@ from (
         #and tr.source = 'adcash'
         #and sub.subStartDate >= '2015-01-19'
         #and dpay.year_week_start >= '2015-01-26'
-    group by lower(sub.product),lower(t.source),cohort,payWeek
-    order by lower(sub.product),lower(t.source),cohort,payWeek
+    group by lower(sub.product),/*lower(t.source),*/cohort,payWeek
+    order by lower(sub.product),/*lower(t.source),*/cohort,payWeek
 ) p
 inner join (select product, cohort, sum(subscribers) subscribers FROM simplemvas.cohort_subs_week_simple GROUP BY product, cohort) cs on cs.cohort=p.cohort and lower(cs.product)=lower(p.product) #and lower(cs.source)=lower(p.source)
 where p.payWeek is not null
