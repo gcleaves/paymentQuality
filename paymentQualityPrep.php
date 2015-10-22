@@ -4,9 +4,41 @@ ini_set('date.timezone','UTC');
 This script prepares payment data for further analysis.  
 It calculates running totals.
 
-this is the back_fill branch
-*/
+1. Run SQL scipt to populate helper table:
 
+set @startDate='2015-09-21';
+delete from simplemvas.cohort_subs_week_simple WHERE cohort >= @startDate;
+insert into simplemvas.cohort_subs_week_simple
+select 
+    sub.product
+	,dsub.year_week_start cohort
+	#,t.source
+	,'source'
+	,count(distinct sub.request_id2) subscribers
+from
+    simplemvas.dcb_subscriptors sub
+        inner join
+		general.dates dsub ON date(sub.subStartDate) = dsub.date
+			#inner join
+		#simplemvas.dcb_transactions t ON sub.request_id2 = t.request_id2
+where
+	1=1
+	#AND sub.product in ('videospremium')
+	and sub.status != - 1
+	and sub.product !='###TEMP###'
+	and sub.subStartDate >= @startDate
+group by 
+    sub.product
+	,dsub.year_week_start
+	#,t.source
+;
+
+2. ssh root@db2.crazynetworks.net -p23332 -L 3307:localhost:3306
+
+3. run this script
+
+4. update tableua
+*/ 
 
 
 $backFill = 1;
